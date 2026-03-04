@@ -25,7 +25,7 @@ class LocationCurrencyService {
     return _countryCurrencyMap.values.toList();
   }
 
-  static Future<Map<String, String>> detectCurrencyFromLocation() async {
+  static Future<Map<String, String>> detectCurrencyFromGPS() async {
     try {
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) return _defaultCurrency();
