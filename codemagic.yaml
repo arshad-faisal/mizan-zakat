@@ -1,0 +1,26 @@
+workflows:
+  android-workflow:
+    name: Android Build
+    max_build_duration: 60
+    environment:
+      flutter: stable
+    scripts:
+      - name: Set up Flutter project
+        script: |
+          flutter create . --project-name zakat_calculator --org com.mizanzakat
+          
+      - name: Get dependencies
+        script: |
+          flutter pub get
+          
+      - name: Build APK
+        script: |
+          flutter build apk --release
+          
+    artifacts:
+      - build/app/outputs/flutter-apk/app-release.apk
+      
+    publishing:
+      email:
+        recipients:
+          - arshadfaisal786@gmail.com
