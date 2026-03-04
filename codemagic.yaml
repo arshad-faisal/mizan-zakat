@@ -6,20 +6,19 @@ workflows:
       flutter: 3.22.3
     scripts:
       - name: Generate Android project
-        script: flutter create --platforms android --project-name zakat_calculator --org com.mizanzakat . || true
-
+        script: |
+          flutter create --platforms android --project-name zakat_calculator --org com.mizanzakat . || true
       - name: Fix intl version
-        script: sed -i 's/intl:.*/intl: ^0.20.2/' pubspec.yaml
-
+        script: |
+          flutter pub add intl:0.20.2
       - name: Get dependencies
-        script: flutter pub get
-
+        script: |
+          flutter pub get
       - name: Build APK
-        script: flutter build apk --release
-
+        script: |
+          flutter build apk --release
     artifacts:
       - build/app/outputs/flutter-apk/app-release.apk
-
     publishing:
       email:
         recipients:
