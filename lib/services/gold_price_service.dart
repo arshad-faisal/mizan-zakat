@@ -24,7 +24,7 @@ class GoldPriceService {
     if (currencyCode == 'USD') return 1.0;
     try {
       final response = await http
-          .get(Uri.parse('https://open.er-api.com/v6/latest/USD'))
+          .get(Uri.parse('https://api.exchangerate-api.com/v4/latest/USD'))
           .timeout(const Duration(seconds: 10));
       if (response.statusCode == 200) {
         final data  = jsonDecode(response.body);
