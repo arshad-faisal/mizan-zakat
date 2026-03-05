@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../services/location_currency_service.dart';
-import '../services/gold_price_service.dart';
 import '../services/zakat_calculator_service.dart';
 import '../models/zakat_model.dart';
 import '../widgets/asset_input_card.dart';
@@ -16,25 +15,20 @@ class ZakatCalculatorScreen extends StatefulWidget {
       _ZakatCalculatorScreenState();
 }
 
-class _ZakatCalculatorScreenState
-    extends State<ZakatCalculatorScreen> {
+class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
   final _formKey = GlobalKey<FormState>();
   final _scrollController = ScrollController();
   final _resultKey = GlobalKey();
   final _calculatorService = ZakatCalculatorService();
   final _locationService = LocationCurrencyService();
-  final _priceService = GoldPriceService();
 
   String _currencySymbol = '₹';
   String _currencyCode = 'INR';
   String _currencyName = 'Indian Rupee';
   bool _isLoadingLocation = true;
-  bool _isLoadingPrices = true;
-  String _loadingMessage = 'Detecting your location...';
 
-  double _goldPricePerGram = 0;
-  double _silverPricePerGram = 0;
-
+  final _goldPriceCtrl = TextEditingController();
+  final _silverPriceCtrl = TextEditingController();
   final _cashHomeCtrl = TextEditingController();
   final _cashBankCtrl = TextEditingController();
   final _goldGramsCtrl = TextEditingController();
@@ -53,45 +47,23 @@ class _ZakatCalculatorScreenState
   }
 
   Future<void> _initApp() async {
-    setState(
-        () => _loadingMessage = 'Detecting your location & currency...');
     final currency = await _locationService.detectCurrencyFromGPS();
     setState(() {
       _currencySymbol = currency['symbol']!;
       _currencyCode = currency['code']!;
       _currencyName = currency['name']!;
       _isLoadingLocation = false;
-      _loadingMessage = 'Fetching live gold & silver prices...';
-    });
-    final metalPricesUSD = await _priceService.fetchMetalPricesUSD();
-    final exchangeRate =
-        await _priceService.fetchExchangeRate(_currencyCode);
-    setState(() {
-      _goldPricePerGram =
-          metalPricesUSD['goldPerGram']! * exchangeRate;
-      _silverPricePerGram =
-          metalPricesUSD['silverPerGram']! * exchangeRate;
-      _isLoadingPrices = false;
     });
   }
 
-  Future<void> _changeCurrency(
-      String code, String symbol, String name) async {
-    setState(() {
-      _isLoadingPrices = true;
-      _result = null;
-    });
-    final metalPricesUSD = await _priceService.fetchMetalPricesUSD();
-    final exchangeRate = await _priceService.fetchExchangeRate(code);
+  void _changeCurrency(String code, String symbol, String name) {
     setState(() {
       _currencyCode = code;
       _currencySymbol = symbol;
       _currencyName = name;
-      _goldPricePerGram =
-          metalPricesUSD['goldPerGram']! * exchangeRate;
-      _silverPricePerGram =
-          metalPricesUSD['silverPerGram']! * exchangeRate;
-      _isLoadingPrices = false;
+      _result = null;
+      _goldPriceCtrl.clear();
+      _silverPriceCtrl.clear();
     });
   }
 
@@ -99,6 +71,20 @@ class _ZakatCalculatorScreenState
     FocusScope.of(context).unfocus();
     double parse(TextEditingController c) =>
         double.tryParse(c.text.replaceAll(',', '')) ?? 0;
+
+    final goldPrice = parse(_goldPriceCtrl);
+    final silverPrice = parse(_silverPriceCtrl);
+
+    if (goldPrice <= 0 || silverPrice <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+              'Please enter today\'s gold & silver price per gram to continue'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
 
     final assets = ZakatAssets(
       cashAtHome: parse(_cashHomeCtrl),
@@ -113,8 +99,8 @@ class _ZakatCalculatorScreenState
 
     final result = _calculatorService.calculate(
       assets: assets,
-      goldPricePerGram: _goldPricePerGram,
-      silverPricePerGram: _silverPricePerGram,
+      goldPricePerGram: goldPrice,
+      silverPricePerGram: silverPrice,
       currencySymbol: _currencySymbol,
       currencyCode: _currencyCode,
     );
@@ -123,17 +109,17 @@ class _ZakatCalculatorScreenState
 
     Future.delayed(const Duration(milliseconds: 400), () {
       if (_resultKey.currentContext != null) {
-        Scrollable.ensureVisible(
-          _resultKey.currentContext!,
-          duration: const Duration(milliseconds: 600),
-          curve: Curves.easeInOut,
-        );
+        Scrollable.ensureVisible(_resultKey.currentContext!,
+            duration: const Duration(milliseconds: 600),
+            curve: Curves.easeInOut);
       }
     });
   }
 
   void _resetForm() {
     setState(() {
+      _goldPriceCtrl.clear();
+      _silverPriceCtrl.clear();
       _cashHomeCtrl.clear();
       _cashBankCtrl.clear();
       _goldGramsCtrl.clear();
@@ -152,6 +138,8 @@ class _ZakatCalculatorScreenState
   @override
   void dispose() {
     _scrollController.dispose();
+    _goldPriceCtrl.dispose();
+    _silverPriceCtrl.dispose();
     _cashHomeCtrl.dispose();
     _cashBankCtrl.dispose();
     _goldGramsCtrl.dispose();
@@ -179,8 +167,7 @@ class _ZakatCalculatorScreenState
                     fontWeight: FontWeight.bold,
                     fontSize: 18)),
             Text('Free · No Ads · No Data Collected',
-                style:
-                    TextStyle(color: Colors.white54, fontSize: 10)),
+                style: TextStyle(color: Colors.white54, fontSize: 10)),
           ],
         ),
         actions: [
@@ -192,8 +179,7 @@ class _ZakatCalculatorScreenState
           PopupMenuButton<Map<String, String>>(
             icon: Row(
               children: [
-                const Icon(Icons.language,
-                    color: Colors.white, size: 20),
+                const Icon(Icons.language, color: Colors.white, size: 20),
                 const SizedBox(width: 2),
                 Text(_currencyCode,
                     style: const TextStyle(
@@ -217,7 +203,8 @@ class _ZakatCalculatorScreenState
         ],
       ),
       body: _isLoadingLocation
-          ? _LoadingScreen(message: _loadingMessage)
+          ? const _LoadingScreen(
+              message: 'Detecting your location & currency...')
           : SingleChildScrollView(
               controller: _scrollController,
               padding: const EdgeInsets.all(16),
@@ -226,14 +213,14 @@ class _ZakatCalculatorScreenState
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Currency banner
                     Container(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 14, vertical: 8),
                       decoration: BoxDecoration(
                         color: Colors.green[100],
                         borderRadius: BorderRadius.circular(10),
-                        border:
-                            Border.all(color: Colors.green[300]!),
+                        border: Border.all(color: Colors.green[300]!),
                       ),
                       child: Row(
                         children: [
@@ -242,7 +229,7 @@ class _ZakatCalculatorScreenState
                           const SizedBox(width: 6),
                           Expanded(
                             child: Text(
-                              'Currency auto-detected: $_currencyName ($_currencyCode)',
+                              'Currency: $_currencyName ($_currencyCode) — change via 🌐 menu',
                               style: const TextStyle(
                                   color: Color(0xFF1B5E20),
                                   fontWeight: FontWeight.w600,
@@ -253,56 +240,67 @@ class _ZakatCalculatorScreenState
                       ),
                     ),
                     const SizedBox(height: 12),
+
                     ExplanationCard(
                       currencyCode: _currencyCode,
-                      goldPrice: _goldPricePerGram,
-                      silverPrice: _silverPricePerGram,
-                      isLoading: _isLoadingPrices,
+                      goldPrice:
+                          double.tryParse(_goldPriceCtrl.text) ?? 0,
+                      silverPrice:
+                          double.tryParse(_silverPriceCtrl.text) ?? 0,
+                      isLoading: false,
                       currencySymbol: _currencySymbol,
                       fmt: fmt,
                     ),
                     const SizedBox(height: 12),
-                    if (!_isLoadingPrices)
-                      Card(
-                        color: Colors.amber[50],
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
-                        child: Padding(
-                          padding: const EdgeInsets.all(14),
-                          child: Column(
-                            crossAxisAlignment:
-                                CrossAxisAlignment.start,
-                            children: [
-                              const Text('📈 Live Metal Prices Today',
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 14)),
-                              const SizedBox(height: 8),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: _PriceTile(
-                                      label: '🥇 Gold / gram',
-                                      value:
-                                          '$_currencySymbol ${fmt.format(_goldPricePerGram)}',
-                                      color: Colors.amber[100]!,
-                                    ),
+
+                    // Metal price entry card
+                    Card(
+                      color: Colors.amber[50],
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                      child: Padding(
+                        padding: const EdgeInsets.all(14),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('📈 Today\'s Metal Prices',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14)),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Search Google: "gold price per gram $_currencyCode today"',
+                              style: TextStyle(
+                                  fontSize: 11, color: Colors.grey[600]),
+                            ),
+                            const SizedBox(height: 10),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _MetalPriceInput(
+                                    label: '🥇 Gold / gram',
+                                    controller: _goldPriceCtrl,
+                                    symbol: _currencySymbol,
+                                    color: Colors.amber[100]!,
                                   ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: _PriceTile(
-                                      label: '🥈 Silver / gram',
-                                      value:
-                                          '$_currencySymbol ${fmt.format(_silverPricePerGram)}',
-                                      color: Colors.grey[100]!,
-                                    ),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: _MetalPriceInput(
+                                    label: '🥈 Silver / gram',
+                                    controller: _silverPriceCtrl,
+                                    symbol: _currencySymbol,
+                                    color: Colors.grey[100]!,
                                   ),
-                                ],
-                              ),
-                            ],
-                          ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
+                    ),
+                    const SizedBox(height: 12),
+
                     const SectionHeader(title: '💵 Cash & Bank Savings'),
                     AssetInputCard(
                         label: 'Cash at Home',
@@ -344,8 +342,7 @@ class _ZakatCalculatorScreenState
                         hint: 'Recoverable loans given out',
                         controller: _receivablesCtrl,
                         symbol: _currencySymbol),
-                    const SectionHeader(
-                        title: '📉 Debts & Liabilities'),
+                    const SectionHeader(title: '📉 Debts & Liabilities'),
                     AssetInputCard(
                         label: 'Outstanding Debts',
                         hint: 'Loans, bills due now',
@@ -357,26 +354,19 @@ class _ZakatCalculatorScreenState
                       width: double.infinity,
                       height: 56,
                       child: ElevatedButton.icon(
-                        onPressed: _isLoadingPrices
-                            ? null
-                            : _calculateZakat,
+                        onPressed: _calculateZakat,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF1B5E20),
                           foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(
-                              borderRadius:
-                                  BorderRadius.circular(14)),
+                              borderRadius: BorderRadius.circular(14)),
                           elevation: 3,
                         ),
                         icon: const Icon(Icons.calculate, size: 24),
-                        label: Text(
-                          _isLoadingPrices
-                              ? 'Loading Prices...'
-                              : 'Calculate My Zakat',
-                          style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold),
-                        ),
+                        label: const Text('Calculate My Zakat',
+                            style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold)),
                       ),
                     ),
                     const SizedBox(height: 28),
@@ -397,8 +387,7 @@ class _ZakatCalculatorScreenState
                             'In memory of Mohammad Ibrahim (Nana)\n& Mohammad Aslam (Dada) رحمهم الله',
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                                color: Colors.grey[500],
-                                fontSize: 11),
+                                color: Colors.grey[500], fontSize: 11),
                           ),
                         ],
                       ),
@@ -422,8 +411,7 @@ class _LoadingScreen extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const CircularProgressIndicator(
-              color: Color(0xFF1B5E20)),
+          const CircularProgressIndicator(color: Color(0xFF1B5E20)),
           const SizedBox(height: 20),
           Text(message,
               style: const TextStyle(
@@ -434,13 +422,18 @@ class _LoadingScreen extends StatelessWidget {
   }
 }
 
-class _PriceTile extends StatelessWidget {
-  final String label, value;
+class _MetalPriceInput extends StatelessWidget {
+  final String label;
+  final TextEditingController controller;
+  final String symbol;
   final Color color;
-  const _PriceTile(
-      {required this.label,
-      required this.value,
-      required this.color});
+
+  const _MetalPriceInput({
+    required this.label,
+    required this.controller,
+    required this.symbol,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -455,9 +448,28 @@ class _PriceTile extends StatelessWidget {
               style: const TextStyle(
                   fontSize: 11, color: Colors.black54)),
           const SizedBox(height: 4),
-          Text(value,
-              style: const TextStyle(
-                  fontWeight: FontWeight.bold, fontSize: 13)),
+          Row(
+            children: [
+              Text('$symbol ',
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 13)),
+              Expanded(
+                child: TextField(
+                  controller: controller,
+                  keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 13),
+                  decoration: const InputDecoration(
+                    isDense: true,
+                    hintText: '0.00',
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
