@@ -233,7 +233,7 @@ class _TributeScreenState extends State<TributeScreen>
                               const SizedBox(height: 20),
                               _PersonCard(
                                 icon: '🌙',
-                                relation: 'Dada Jaan',
+                                relation: 'Dada',
                                 relationSubtext:
                                     'Beloved Paternal Grandfather',
                                 name: 'Mohammad Aslam',
