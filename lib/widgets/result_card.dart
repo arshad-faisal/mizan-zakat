@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:share_plus/share_plus.dart';
 import '../models/zakat_model.dart';
 
 class ResultCard extends StatelessWidget {
@@ -8,12 +9,30 @@ class ResultCard extends StatelessWidget {
 
   const ResultCard({super.key, required this.result, required this.fmt});
 
+  void _shareResult() {
+    final s = result.currencySymbol;
+    final text = '''
+🌙 Mizan Zakat — My Calculation
+━━━━━━━━━━━━━━━━━━
+Total Assets:     $s ${fmt.format(result.totalWealth + 0)}
+Liabilities:      − $s ${fmt.format(0)}
+Net Wealth:       $s ${fmt.format(result.totalWealth)}
+Nisab (Silver):   $s ${fmt.format(result.nisabUsed)}
+━━━━━━━━━━━━━━━━━━
+${result.meetsNisab ? '✅ Zakat Due: $s ${fmt.format(result.zakatAmount)} (2.5%)' : '⚠️ Zakat Not Due This Year'}
+━━━━━━━━━━━━━━━━━━
+Calculated with Mizan Zakat App 🤲
+In memory of Mohammad Ibrahim (Nana) & Mohammad Aslam (Dada) رحمهم الله''';
+
+    Share.share(text, subject: '🌙 My Zakat Calculation — Mizan Zakat');
+  }
+
   @override
   Widget build(BuildContext context) {
     final s = result.currencySymbol;
     return Column(
       children: [
-        // Main result
+        // Main result card
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(20),
@@ -46,17 +65,30 @@ class ResultCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   'Total Zakatable Wealth: $s ${fmt.format(result.totalWealth)}',
-                  style: const TextStyle(
-                      color: Colors.white70, fontSize: 13),
+                  style: const TextStyle(color: Colors.white70, fontSize: 13),
                 ),
               ] else ...[
                 Text(
                   'Your wealth ($s ${fmt.format(result.totalWealth)}) is below Nisab ($s ${fmt.format(result.nisabUsed)})',
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                      color: Colors.white70, fontSize: 13),
+                  style: const TextStyle(color: Colors.white70, fontSize: 13),
                 ),
               ],
+              const SizedBox(height: 16),
+              // Share button
+              OutlinedButton.icon(
+                onPressed: _shareResult,
+                icon: const Icon(Icons.share, color: Colors.white, size: 18),
+                label: const Text('Share My Calculation',
+                    style: TextStyle(color: Colors.white, fontSize: 13)),
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: Colors.white54),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                ),
+              ),
             ],
           ),
         ),
@@ -114,13 +146,6 @@ class ResultCard extends StatelessWidget {
                           )),
                   const Divider(),
                   _BreakdownRow(
-                    label: 'Outstanding Debts',
-                    value:
-                        '- $s ${fmt.format(result.totalWealth < 0 ? 0 : 0)}',
-                    isDeduction: true,
-                  ),
-                  const Divider(),
-                  _BreakdownRow(
                     label: 'Net Zakatable Wealth',
                     value: '$s ${fmt.format(result.totalWealth)}',
                     bold: true,
@@ -153,11 +178,13 @@ class _NisabRow extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label,
-              style: TextStyle(
-                  fontSize: 12,
-                  fontWeight:
-                      bold ? FontWeight.bold : FontWeight.normal)),
+          Expanded(
+            child: Text(label,
+                style: TextStyle(
+                    fontSize: 12,
+                    fontWeight:
+                        bold ? FontWeight.bold : FontWeight.normal)),
+          ),
           Text(value,
               style: TextStyle(
                   fontSize: 12,
