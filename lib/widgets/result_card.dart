@@ -2,29 +2,32 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 import '../models/zakat_model.dart';
+import '../l10n/app_strings.dart';
 
 class ResultCard extends StatelessWidget {
   final ZakatResult result;
   final NumberFormat fmt;
+  final AppStrings strings;
 
-  const ResultCard({super.key, required this.result, required this.fmt});
+  const ResultCard({
+    super.key,
+    required this.result,
+    required this.fmt,
+    required this.strings,
+  });
 
   void _shareResult() {
     final s = result.currencySymbol;
-    final text = '''
-🌙 Mizan Zakat — My Calculation
-━━━━━━━━━━━━━━━━━━
-Total Assets:    $s ${fmt.format(result.totalAssets)}
-Liabilities:     − $s ${fmt.format(result.outstandingDebts)}
-Net Wealth:      $s ${fmt.format(result.totalWealth)}
-Nisab (Silver):  $s ${fmt.format(result.nisabUsed)}
-━━━━━━━━━━━━━━━━━━
-${result.meetsNisab ? '✅ Zakat Due: $s ${fmt.format(result.zakatAmount)} (2.5%)' : '⚠️ Zakat Not Due This Year'}
-━━━━━━━━━━━━━━━━━━
-Calculated with Mizan Zakat App 🤲
-In memory of Mohammad Ibrahim (Nana) & Mohammad Aslam (Dada) رحمهم الله''';
-
-    Share.share(text, subject: '🌙 My Zakat Calculation — Mizan Zakat');
+    final text = strings.shareText(
+      s,
+      fmt.format(result.totalAssets),
+      fmt.format(result.outstandingDebts),
+      fmt.format(result.totalWealth),
+      fmt.format(result.nisabUsed),
+      fmt.format(result.zakatAmount),
+      result.meetsNisab,
+    );
+    Share.share(text, subject: '🌙 Mizan Zakat');
   }
 
   @override
@@ -46,8 +49,8 @@ In memory of Mohammad Ibrahim (Nana) & Mohammad Aslam (Dada) رحمهم الله
             children: [
               Text(
                 result.meetsNisab
-                    ? '🌙 Zakat is Due'
-                    : '✅ No Zakat Due This Year',
+                    ? strings.zakatDue
+                    : strings.noZakatDue,
                 style: const TextStyle(
                     color: Colors.white,
                     fontSize: 20,
@@ -55,36 +58,35 @@ In memory of Mohammad Ibrahim (Nana) & Mohammad Aslam (Dada) رحمهم الله
               ),
               const SizedBox(height: 8),
               if (result.meetsNisab) ...[
-                Text(
-                  '$s ${fmt.format(result.zakatAmount)}',
-                  style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold),
-                ),
+                Text('$s ${fmt.format(result.zakatAmount)}',
+                    style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold)),
                 const SizedBox(height: 4),
                 Text(
-                  'Total Zakatable Wealth: $s ${fmt.format(result.totalWealth)}',
-                  style: const TextStyle(
-                      color: Colors.white70, fontSize: 13),
-                ),
+                    strings.zakatWealth(
+                        s, fmt.format(result.totalWealth)),
+                    style: const TextStyle(
+                        color: Colors.white70, fontSize: 13)),
               ] else ...[
                 const SizedBox(height: 6),
                 Text(
-                  'Your wealth ($s ${fmt.format(result.totalWealth)}) is below Nisab ($s ${fmt.format(result.nisabUsed)})',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                      color: Colors.white70, fontSize: 13),
-                ),
+                    strings.belowNisab(
+                        '$s ${fmt.format(result.totalWealth)}',
+                        '$s ${fmt.format(result.nisabUsed)}'),
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                        color: Colors.white70, fontSize: 13)),
               ],
               const SizedBox(height: 16),
               OutlinedButton.icon(
                 onPressed: _shareResult,
                 icon: const Icon(Icons.share,
                     color: Colors.white, size: 18),
-                label: const Text('Share My Calculation',
-                    style:
-                        TextStyle(color: Colors.white, fontSize: 13)),
+                label: Text(strings.shareBtn,
+                    style: const TextStyle(
+                        color: Colors.white, fontSize: 13)),
                 style: OutlinedButton.styleFrom(
                   side: const BorderSide(color: Colors.white54),
                   shape: RoundedRectangleBorder(
@@ -107,19 +109,19 @@ In memory of Mohammad Ibrahim (Nana) & Mohammad Aslam (Dada) رحمهم الله
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('📊 Nisab Thresholds',
-                    style: TextStyle(
+                Text(strings.nisabThresholds,
+                    style: const TextStyle(
                         fontWeight: FontWeight.bold, fontSize: 14)),
                 const SizedBox(height: 8),
                 _NisabRow(
-                    label: '🥇 Gold Nisab (87.48g)',
+                    label: strings.goldNisabRow,
                     value: '$s ${fmt.format(result.goldNisab)}'),
                 _NisabRow(
-                    label: '🥈 Silver Nisab (612.36g)',
+                    label: strings.silverNisabRow,
                     value: '$s ${fmt.format(result.silverNisab)}'),
                 const Divider(),
                 _NisabRow(
-                    label: 'Nisab Used (Silver — Hanafi)',
+                    label: strings.nisabUsedRow,
                     value: '$s ${fmt.format(result.nisabUsed)}',
                     bold: true),
               ],
@@ -137,8 +139,8 @@ In memory of Mohammad Ibrahim (Nana) & Mohammad Aslam (Dada) رحمهم الله
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('🧾 Wealth Breakdown',
-                    style: TextStyle(
+                Text(strings.wealthBreakdown,
+                    style: const TextStyle(
                         fontWeight: FontWeight.bold, fontSize: 14)),
                 const SizedBox(height: 8),
                 ...result.breakdown.entries
@@ -150,22 +152,23 @@ In memory of Mohammad Ibrahim (Nana) & Mohammad Aslam (Dada) رحمهم الله
                 if (result.outstandingDebts > 0) ...[
                   const Divider(),
                   _BreakdownRow(
-                    label: '📉 Outstanding Debts',
-                    value: '− $s ${fmt.format(result.outstandingDebts)}',
+                    label: strings.outstandingDebtsRow,
+                    value:
+                        '− $s ${fmt.format(result.outstandingDebts)}',
                     isDeduction: true,
                   ),
                 ],
                 const Divider(),
                 _BreakdownRow(
-                  label: 'Net Zakatable Wealth',
+                  label: strings.netZakatableWealth,
                   value: '$s ${fmt.format(result.totalWealth)}',
                   bold: true,
                 ),
                 _BreakdownRow(
-                  label: 'Zakat Due (2.5%)',
+                  label: strings.zakatDue25,
                   value: result.meetsNisab
                       ? '$s ${fmt.format(result.zakatAmount)}'
-                      : 'Not Due',
+                      : strings.notDue,
                   bold: true,
                   highlight: result.meetsNisab,
                 ),
