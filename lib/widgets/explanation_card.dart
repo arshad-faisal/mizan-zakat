@@ -1,23 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../services/zakat_calculator_service.dart';
+import '../l10n/app_strings.dart';
 
 class ExplanationCard extends StatelessWidget {
-  final String currencyCode;
   final String currencySymbol;
   final double goldPrice;
   final double silverPrice;
   final bool isLoading;
   final NumberFormat fmt;
+  final AppStrings strings;
 
   const ExplanationCard({
     super.key,
-    required this.currencyCode,
     required this.currencySymbol,
     required this.goldPrice,
     required this.silverPrice,
     required this.isLoading,
     required this.fmt,
+    required this.strings,
   });
 
   @override
@@ -36,48 +37,42 @@ class ExplanationCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('📖 What is Zakat?',
-                style: TextStyle(
+            Text(strings.whatIsZakat,
+                style: const TextStyle(
                     fontWeight: FontWeight.bold, fontSize: 14)),
             const SizedBox(height: 6),
-            const Text(
-              'Zakat is the 3rd Pillar of Islam — an annual 2.5% charity on wealth held for one full lunar year (Hawl), if it exceeds the Nisab (minimum threshold).',
-              style: TextStyle(fontSize: 12, color: Colors.black87),
-            ),
+            Text(strings.zakatDesc,
+                style: const TextStyle(
+                    fontSize: 12, color: Colors.black87)),
             const SizedBox(height: 10),
             if (!isLoading && goldPrice > 0) ...[
               _InfoRow(
-                  label: '⚖️ Zakat Rate',
-                  value: '2.5% of Net Wealth'),
+                  label: strings.zakatRate,
+                  value: strings.zakatRateValue),
               _InfoRow(
-                  label: '🥇 Gold Nisab',
-                  value:
-                      '${fmt.format(ZakatCalculatorService.goldNisabGrams)} grams of gold'),
+                  label: strings.goldNisabLabel,
+                  value: strings.goldNisabGrams),
               _InfoRow(
-                  label: '🥈 Silver Nisab',
-                  value:
-                      '${fmt.format(ZakatCalculatorService.silverNisabGrams)} grams of silver'),
+                  label: strings.silverNisabLabel,
+                  value: strings.silverNisabGrams),
               if (goldNisabValue > 0)
                 _InfoRow(
-                    label: '💰 Gold Nisab Value',
+                    label: strings.goldNisabValue,
                     value:
                         '$currencySymbol ${fmt.format(goldNisabValue)}'),
               if (silverNisabValue > 0)
                 _InfoRow(
-                    label: '💰 Silver Nisab Value',
+                    label: strings.silverNisabValue,
                     value:
                         '$currencySymbol ${fmt.format(silverNisabValue)}'),
               const SizedBox(height: 4),
-              Text(
-                '* Silver Nisab is used (recommended — more inclusive per Hanafi school)',
-                style:
-                    TextStyle(fontSize: 10, color: Colors.grey[600]),
-              ),
+              Text(strings.nisabNote,
+                  style: TextStyle(
+                      fontSize: 10, color: Colors.grey[600])),
             ] else ...[
-              const Text(
-                'Enter gold & silver prices above to see current Nisab values.',
-                style: TextStyle(fontSize: 12, color: Colors.black54),
-              ),
+              Text(strings.enterPricesHint,
+                  style: const TextStyle(
+                      fontSize: 12, color: Colors.black54)),
             ],
           ],
         ),
@@ -97,9 +92,11 @@ class _InfoRow extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label,
-              style: const TextStyle(
-                  fontSize: 12, color: Colors.black54)),
+          Expanded(
+            child: Text(label,
+                style: const TextStyle(
+                    fontSize: 12, color: Colors.black54)),
+          ),
           Text(value,
               style: const TextStyle(
                   fontSize: 12, fontWeight: FontWeight.w600)),
