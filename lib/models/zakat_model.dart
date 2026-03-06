@@ -1,14 +1,18 @@
 class ZakatAssets {
-  double cashAtHome;
-  double cashInBank;
-  double goldGrams;
-  double silverGrams;
-  double businessInventory;
-  double investments;
-  double moneyOwedToYou;
-  double outstandingDebts;
+  final double cashAtHome;
+  final double cashInBank;
+  final double goldGrams;
+  final double silverGrams;
+  final double businessInventory;
+  final double investments;
+  final double moneyOwedToYou;
+  final double outstandingDebts;
+  final double propertyForResale;
+  final double netRentalIncome;
+  final double investmentLand;
+  final double propertyBusinessStock;
 
-  ZakatAssets({
+  const ZakatAssets({
     this.cashAtHome = 0,
     this.cashInBank = 0,
     this.goldGrams = 0,
@@ -17,39 +21,33 @@ class ZakatAssets {
     this.investments = 0,
     this.moneyOwedToYou = 0,
     this.outstandingDebts = 0,
+    this.propertyForResale = 0,
+    this.netRentalIncome = 0,
+    this.investmentLand = 0,
+    this.propertyBusinessStock = 0,
   });
 }
 
 class ZakatResult {
-  final double totalAssets;
-  final double totalLiabilities;
-  final double netWealth;
-  final double nisabGold;
-  final double nisabSilver;
+  final double totalWealth;
+  final double goldNisab;
+  final double silverNisab;
   final double nisabUsed;
-  final bool meetsNisab;
   final double zakatAmount;
+  final bool meetsNisab;
   final String currencySymbol;
   final String currencyCode;
-  final double goldPricePerGram;
-  final double silverPricePerGram;
-  final double goldValue;
-  final double silverValue;
+  final Map<String, double> breakdown;
 
   const ZakatResult({
-    required this.totalAssets,
-    required this.totalLiabilities,
-    required this.netWealth,
-    required this.nisabGold,
-    required this.nisabSilver,
+    required this.totalWealth,
+    required this.goldNisab,
+    required this.silverNisab,
     required this.nisabUsed,
-    required this.meetsNisab,
     required this.zakatAmount,
+    required this.meetsNisab,
     required this.currencySymbol,
     required this.currencyCode,
-    required this.goldPricePerGram,
-    required this.silverPricePerGram,
-    required this.goldValue,
-    required this.silverValue,
+    required this.breakdown,
   });
 }
