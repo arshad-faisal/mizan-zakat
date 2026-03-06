@@ -22,8 +22,8 @@ class AssetInputCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
-      shape:
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10)),
       color: isDeduction ? Colors.red[50] : Colors.white,
       child: Padding(
         padding:
@@ -52,15 +52,13 @@ class AssetInputCard extends StatelessWidget {
               width: 120,
               child: Row(
                 children: [
-                  Text(
-                    '$symbol ',
-                    style: TextStyle(
-                        color: isDeduction
-                            ? Colors.red[700]
-                            : const Color(0xFF1B5E20),
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14),
-                  ),
+                  Text('$symbol ',
+                      style: TextStyle(
+                          color: isDeduction
+                              ? Colors.red[700]
+                              : const Color(0xFF1B5E20),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14)),
                   Expanded(
                     child: TextField(
                       controller: controller,
@@ -95,13 +93,11 @@ class SectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(top: 16, bottom: 8),
-      child: Text(
-        title,
-        style: const TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF1B5E20)),
-      ),
+      child: Text(title,
+          style: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF1B5E20))),
     );
   }
 }
