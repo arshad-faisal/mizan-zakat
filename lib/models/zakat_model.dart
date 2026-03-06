@@ -30,6 +30,8 @@ class ZakatAssets {
 
 class ZakatResult {
   final double totalWealth;
+  final double totalAssets;
+  final double outstandingDebts;
   final double goldNisab;
   final double silverNisab;
   final double nisabUsed;
@@ -41,6 +43,8 @@ class ZakatResult {
 
   const ZakatResult({
     required this.totalWealth,
+    required this.totalAssets,
+    required this.outstandingDebts,
     required this.goldNisab,
     required this.silverNisab,
     required this.nisabUsed,
