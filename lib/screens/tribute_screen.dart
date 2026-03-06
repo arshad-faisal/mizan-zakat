@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../l10n/app_strings.dart';
 import 'zakat_calculator_screen.dart';
 
 class TributeScreen extends StatefulWidget {
@@ -9,127 +10,221 @@ class TributeScreen extends StatefulWidget {
 }
 
 class _TributeScreenState extends State<TributeScreen> {
-  @override
-  void initState() {
-    super.initState();
-    Future.delayed(const Duration(seconds: 9), () {
-      if (mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const ZakatCalculatorScreen()),
-        );
-      }
-    });
+  AppLanguage _selectedLanguage = AppLanguage.english;
+
+  void _selectLanguage(AppLanguage lang) {
+    setState(() => _selectedLanguage = lang);
+  }
+
+  void _continue() {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (_) =>
+            ZakatCalculatorScreen(language: _selectedLanguage),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF1B5E20),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(28),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const SizedBox(height: 30),
-              const Text('🌙', style: TextStyle(fontSize: 72)),
-              const SizedBox(height: 16),
-              const Text(
-                'Mizan Zakat',
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 30,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.2),
-              ),
-              const SizedBox(height: 6),
-              const Text(
-                'Free · No Ads · No Data Collected',
-                style: TextStyle(color: Colors.white54, fontSize: 12),
-              ),
-              const SizedBox(height: 32),
+    final s = AppStrings(_selectedLanguage);
+    final isUrdu = _selectedLanguage == AppLanguage.urdu;
 
-              // Tribute box
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Colors.white12,
-                  borderRadius: BorderRadius.circular(16),
+    return Directionality(
+      textDirection: isUrdu ? TextDirection.rtl : TextDirection.ltr,
+      child: Scaffold(
+        backgroundColor: const Color(0xFF1B5E20),
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              children: [
+                const SizedBox(height: 20),
+                const Text('🌙', style: TextStyle(fontSize: 64)),
+                const SizedBox(height: 12),
+                Text(s.appTitle,
+                    style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1.1)),
+                const SizedBox(height: 4),
+                Text(s.appSubtitle,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                        color: Colors.white54, fontSize: 11)),
+                const SizedBox(height: 24),
+
+                // Language Picker
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: Colors.white12,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Column(
+                    children: [
+                      const Text('🌐',
+                          style: TextStyle(
+                              color: Colors.white70, fontSize: 12)),
+                      const SizedBox(height: 8),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          _LangButton(
+                            label: 'English',
+                            selected: _selectedLanguage ==
+                                AppLanguage.english,
+                            onTap: () =>
+                                _selectLanguage(AppLanguage.english),
+                          ),
+                          const SizedBox(width: 8),
+                          _LangButton(
+                            label: 'اردو',
+                            selected:
+                                _selectedLanguage == AppLanguage.urdu,
+                            onTap: () =>
+                                _selectLanguage(AppLanguage.urdu),
+                          ),
+                          const SizedBox(width: 8),
+                          _LangButton(
+                            label: 'हिंदी',
+                            selected:
+                                _selectedLanguage == AppLanguage.hindi,
+                            onTap: () =>
+                                _selectLanguage(AppLanguage.hindi),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-                child: Column(
-                  children: [
-                    const Text(
-                      '🤲 In Loving Memory',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 12),
-                    const Text(
-                      'Mohammad Ibrahim (Nana)',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600),
-                    ),
-                    const Text(
-                      '& Mohammad Aslam (Dada)',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600),
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'رحمهم الله',
-                      style: TextStyle(color: Colors.white70, fontSize: 18),
-                    ),
-                    const SizedBox(height: 14),
+                const SizedBox(height: 20),
 
-                    // Dua 1
-                    _DuaCard(
-                      arabic:
-                          'رَبِّ اغْفِرْ لِي وَلِوَالِدَيَّ وَلِلْمُؤْمِنِينَ',
-                      transliteration:
-                          'Rabbigh-fir lī wa li-wālidayya wa lil-mu\'minīn',
-                      translation:
-                          'My Lord! Forgive me, my parents, and the believers.',
-                      source: 'Quran 71:28',
-                    ),
-                    const SizedBox(height: 10),
+                // Tribute Box
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(18),
+                  decoration: BoxDecoration(
+                    color: Colors.white12,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.white24),
+                  ),
+                  child: Column(
+                    children: [
+                      Text(s.inLovingMemory,
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 10),
+                      Text(s.tributeLine1,
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600)),
+                      Text(s.tributeLine2,
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600)),
+                      const SizedBox(height: 6),
+                      const Text('رحمهم الله',
+                          style: TextStyle(
+                              color: Colors.white70, fontSize: 18)),
+                      const SizedBox(height: 16),
 
-                    // Dua 2
-                    _DuaCard(
-                      arabic:
-                          'رَّبِّ ارْحَمْهُمَا كَمَا رَبَّيَانِي صَغِيرًا',
-                      transliteration:
-                          'Rabbir-ḥam-humā kamā rabbayānī ṣaghīrā',
-                      translation:
-                          'My Lord! Be merciful to them as they raised me when I was young.',
-                      source: 'Quran 17:24',
-                    ),
-                    const SizedBox(height: 14),
+                      // Dua 1
+                      _DuaCard(
+                        arabic:
+                            'رَبِّ اغْفِرْ لِي وَلِوَالِدَيَّ وَلِلْمُؤْمِنِينَ',
+                        transliteration:
+                            'Rabbigh-fir lī wa li-wālidayya wa lil-mu\'minīn',
+                        translation: s.dua1Translation,
+                        source: 'Quran 71:28',
+                      ),
+                      const SizedBox(height: 10),
 
-                    const Text(
-                      'May Allah grant them Jannatul Firdaus\nand accept this Sadaqah Jariyah 🤲',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.white60, fontSize: 12),
-                    ),
-                  ],
+                      // Dua 2
+                      _DuaCard(
+                        arabic:
+                            'رَّبِّ ارْحَمْهُمَا كَمَا رَبَّيَانِي صَغِيرًا',
+                        transliteration:
+                            'Rabbir-ḥam-humā kamā rabbayānī ṣaghīrā',
+                        translation: s.dua2Translation,
+                        source: 'Quran 17:24',
+                      ),
+                      const SizedBox(height: 14),
+
+                      Text(s.tributeFooter,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                              color: Colors.white60, fontSize: 12)),
+                    ],
+                  ),
                 ),
-              ),
+                const SizedBox(height: 24),
 
-              const SizedBox(height: 28),
-              const CircularProgressIndicator(
-                  color: Colors.white38, strokeWidth: 2),
-              const SizedBox(height: 12),
-              const Text('Loading...',
-                  style: TextStyle(color: Colors.white38, fontSize: 12)),
-              const SizedBox(height: 30),
-            ],
+                // Continue Button
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton(
+                    onPressed: _continue,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: const Color(0xFF1B5E20),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14)),
+                      elevation: 0,
+                    ),
+                    child: Text(s.continueBtn,
+                        style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold)),
+                  ),
+                ),
+                const SizedBox(height: 20),
+              ],
+            ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _LangButton extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _LangButton({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding:
+            const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+        decoration: BoxDecoration(
+          color: selected ? Colors.white : Colors.white24,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+              color: selected
+                  ? const Color(0xFF1B5E20)
+                  : Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 14),
         ),
       ),
     );
@@ -161,35 +256,29 @@ class _DuaCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Text(
-            arabic,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-                color: Colors.white,
-                fontSize: 17,
-                fontWeight: FontWeight.w600,
-                height: 1.8),
-          ),
+          Text(arabic,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 17,
+                  fontWeight: FontWeight.w600,
+                  height: 1.8)),
           const SizedBox(height: 6),
-          Text(
-            transliteration,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-                color: Colors.white60,
-                fontSize: 11,
-                fontStyle: FontStyle.italic),
-          ),
+          Text(transliteration,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                  color: Colors.white60,
+                  fontSize: 11,
+                  fontStyle: FontStyle.italic)),
           const SizedBox(height: 4),
-          Text(
-            '"$translation"',
-            textAlign: TextAlign.center,
-            style: const TextStyle(color: Colors.white70, fontSize: 12),
-          ),
+          Text('"$translation"',
+              textAlign: TextAlign.center,
+              style:
+                  const TextStyle(color: Colors.white70, fontSize: 12)),
           const SizedBox(height: 4),
-          Text(
-            source,
-            style: const TextStyle(color: Colors.white38, fontSize: 10),
-          ),
+          Text(source,
+              style: const TextStyle(
+                  color: Colors.white38, fontSize: 10)),
         ],
       ),
     );
