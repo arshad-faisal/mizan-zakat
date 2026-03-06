@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'screens/zakat_calculator_screen.dart';
+import 'screens/tribute_screen.dart';
 
 void main() {
   runApp(const MizanZakatApp());
@@ -17,9 +18,8 @@ class MizanZakatApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(
             seedColor: const Color(0xFF1B5E20)),
         useMaterial3: true,
-        fontFamily: 'Roboto',
       ),
-      home: const ZakatCalculatorScreen(),
+      home: const TributeScreen(),
     );
   }
 }
