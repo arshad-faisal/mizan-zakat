@@ -1,8 +1,8 @@
 import '../models/zakat_model.dart';
 
 class ZakatCalculatorService {
-  static const double nisabGoldGrams = 87.48;
-  static const double nisabSilverGrams = 612.36;
+  static const double goldNisabGrams = 87.48;
+  static const double silverNisabGrams = 612.36;
   static const double zakatRate = 0.025;
 
   ZakatResult calculate({
@@ -12,42 +12,41 @@ class ZakatCalculatorService {
     required String currencySymbol,
     required String currencyCode,
   }) {
-    double nisabGoldValue = nisabGoldGrams * goldPricePerGram;
-    double nisabSilverValue = nisabSilverGrams * silverPricePerGram;
+    final goldValue = assets.goldGrams * goldPricePerGram;
+    final silverValue = assets.silverGrams * silverPricePerGram;
 
-    double goldValue = assets.goldGrams * goldPricePerGram;
-    double silverValue = assets.silverGrams * silverPricePerGram;
+    final breakdown = <String, double>{
+      'Cash at Home': assets.cashAtHome,
+      'Bank Accounts': assets.cashInBank,
+      'Gold': goldValue,
+      'Silver': silverValue,
+      'Business Inventory': assets.businessInventory,
+      'Stocks & Investments': assets.investments,
+      'Money Owed to You': assets.moneyOwedToYou,
+      'Property for Resale': assets.propertyForResale,
+      'Net Rental Income': assets.netRentalIncome,
+      'Investment Land': assets.investmentLand,
+      'Property Business Stock': assets.propertyBusinessStock,
+    };
 
-    double totalAssets = assets.cashAtHome +
-        assets.cashInBank +
-        goldValue +
-        silverValue +
-        assets.businessInventory +
-        assets.investments +
-        assets.moneyOwedToYou;
-
-    double netWealth = totalAssets - assets.outstandingDebts;
-    if (netWealth < 0) netWealth = 0;
-
-    double nisabUsed = nisabSilverValue;
-    bool meetsNisab = netWealth >= nisabUsed;
-    double zakatAmount = meetsNisab ? netWealth * zakatRate : 0;
+    final totalAssets = breakdown.values.fold(0.0, (a, b) => a + b);
+    final totalWealth = totalAssets - assets.outstandingDebts;
+    final goldNisab = goldNisabGrams * goldPricePerGram;
+    final silverNisab = silverNisabGrams * silverPricePerGram;
+    final nisabUsed = silverNisab;
+    final meetsNisab = totalWealth >= nisabUsed;
+    final zakatAmount = meetsNisab ? totalWealth * zakatRate : 0.0;
 
     return ZakatResult(
-      totalAssets: totalAssets,
-      totalLiabilities: assets.outstandingDebts,
-      netWealth: netWealth,
-      nisabGold: nisabGoldValue,
-      nisabSilver: nisabSilverValue,
+      totalWealth: totalWealth,
+      goldNisab: goldNisab,
+      silverNisab: silverNisab,
       nisabUsed: nisabUsed,
-      meetsNisab: meetsNisab,
       zakatAmount: zakatAmount,
+      meetsNisab: meetsNisab,
       currencySymbol: currencySymbol,
       currencyCode: currencyCode,
-      goldPricePerGram: goldPricePerGram,
-      silverPricePerGram: silverPricePerGram,
-      goldValue: goldValue,
-      silverValue: silverValue,
+      breakdown: breakdown,
     );
   }
 }
