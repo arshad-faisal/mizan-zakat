@@ -14,10 +14,10 @@ class ResultCard extends StatelessWidget {
     final text = '''
 🌙 Mizan Zakat — My Calculation
 ━━━━━━━━━━━━━━━━━━
-Total Assets:     $s ${fmt.format(result.totalWealth + 0)}
-Liabilities:      − $s ${fmt.format(0)}
-Net Wealth:       $s ${fmt.format(result.totalWealth)}
-Nisab (Silver):   $s ${fmt.format(result.nisabUsed)}
+Total Assets:    $s ${fmt.format(result.totalAssets)}
+Liabilities:     − $s ${fmt.format(result.outstandingDebts)}
+Net Wealth:      $s ${fmt.format(result.totalWealth)}
+Nisab (Silver):  $s ${fmt.format(result.nisabUsed)}
 ━━━━━━━━━━━━━━━━━━
 ${result.meetsNisab ? '✅ Zakat Due: $s ${fmt.format(result.zakatAmount)} (2.5%)' : '⚠️ Zakat Not Due This Year'}
 ━━━━━━━━━━━━━━━━━━
@@ -32,7 +32,7 @@ In memory of Mohammad Ibrahim (Nana) & Mohammad Aslam (Dada) رحمهم الله
     final s = result.currencySymbol;
     return Column(
       children: [
-        // Main result card
+        // Main result
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(20),
@@ -65,28 +65,32 @@ In memory of Mohammad Ibrahim (Nana) & Mohammad Aslam (Dada) رحمهم الله
                 const SizedBox(height: 4),
                 Text(
                   'Total Zakatable Wealth: $s ${fmt.format(result.totalWealth)}',
-                  style: const TextStyle(color: Colors.white70, fontSize: 13),
+                  style: const TextStyle(
+                      color: Colors.white70, fontSize: 13),
                 ),
               ] else ...[
+                const SizedBox(height: 6),
                 Text(
                   'Your wealth ($s ${fmt.format(result.totalWealth)}) is below Nisab ($s ${fmt.format(result.nisabUsed)})',
                   textAlign: TextAlign.center,
-                  style: const TextStyle(color: Colors.white70, fontSize: 13),
+                  style: const TextStyle(
+                      color: Colors.white70, fontSize: 13),
                 ),
               ],
               const SizedBox(height: 16),
-              // Share button
               OutlinedButton.icon(
                 onPressed: _shareResult,
-                icon: const Icon(Icons.share, color: Colors.white, size: 18),
+                icon: const Icon(Icons.share,
+                    color: Colors.white, size: 18),
                 label: const Text('Share My Calculation',
-                    style: TextStyle(color: Colors.white, fontSize: 13)),
+                    style:
+                        TextStyle(color: Colors.white, fontSize: 13)),
                 style: OutlinedButton.styleFrom(
                   side: const BorderSide(color: Colors.white54),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8)),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16, vertical: 8),
                 ),
               ),
             ],
@@ -94,7 +98,7 @@ In memory of Mohammad Ibrahim (Nana) & Mohammad Aslam (Dada) رحمهم الله
         ),
         const SizedBox(height: 12),
 
-        // Nisab info
+        // Nisab card
         Card(
           shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12)),
@@ -124,42 +128,51 @@ In memory of Mohammad Ibrahim (Nana) & Mohammad Aslam (Dada) رحمهم الله
         ),
         const SizedBox(height: 12),
 
-        // Breakdown
-        if (result.meetsNisab)
-          Card(
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12)),
-            child: Padding(
-              padding: const EdgeInsets.all(14),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('🧾 Wealth Breakdown',
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 14)),
-                  const SizedBox(height: 8),
-                  ...result.breakdown.entries
-                      .where((e) => e.value > 0)
-                      .map((e) => _BreakdownRow(
-                            label: e.key,
-                            value: '$s ${fmt.format(e.value)}',
-                          )),
+        // Breakdown card
+        Card(
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12)),
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('🧾 Wealth Breakdown',
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 14)),
+                const SizedBox(height: 8),
+                ...result.breakdown.entries
+                    .where((e) => e.value > 0)
+                    .map((e) => _BreakdownRow(
+                          label: e.key,
+                          value: '$s ${fmt.format(e.value)}',
+                        )),
+                if (result.outstandingDebts > 0) ...[
                   const Divider(),
                   _BreakdownRow(
-                    label: 'Net Zakatable Wealth',
-                    value: '$s ${fmt.format(result.totalWealth)}',
-                    bold: true,
-                  ),
-                  _BreakdownRow(
-                    label: 'Zakat Due (2.5%)',
-                    value: '$s ${fmt.format(result.zakatAmount)}',
-                    bold: true,
-                    highlight: true,
+                    label: '📉 Outstanding Debts',
+                    value: '− $s ${fmt.format(result.outstandingDebts)}',
+                    isDeduction: true,
                   ),
                 ],
-              ),
+                const Divider(),
+                _BreakdownRow(
+                  label: 'Net Zakatable Wealth',
+                  value: '$s ${fmt.format(result.totalWealth)}',
+                  bold: true,
+                ),
+                _BreakdownRow(
+                  label: 'Zakat Due (2.5%)',
+                  value: result.meetsNisab
+                      ? '$s ${fmt.format(result.zakatAmount)}'
+                      : 'Not Due',
+                  bold: true,
+                  highlight: result.meetsNisab,
+                ),
+              ],
             ),
           ),
+        ),
       ],
     );
   }
