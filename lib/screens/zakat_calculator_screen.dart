@@ -1,4 +1,3 @@
-import 'dart:ui' show TextDirection;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../services/location_currency_service.dart';
@@ -178,84 +177,87 @@ class _ZakatCalculatorScreenState
     final fmt = NumberFormat('#,##0.00');
     final s = AppStrings(_language);
     final isUrdu = _language == AppLanguage.urdu;
+    final textDir =
+        isUrdu ? TextDirection.rtl : TextDirection.ltr;
 
-    return Directionality(
-      textDirection: isUrdu ? TextDirection.rtl : TextDirection.ltr,
-      child: Scaffold(
-        backgroundColor: const Color(0xFFF1F8E9),
-        appBar: AppBar(
-          backgroundColor: const Color(0xFF1B5E20),
-          title: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(s.appTitle,
-                  style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18)),
-              Text(s.appSubtitle,
-                  style: const TextStyle(
-                      color: Colors.white54, fontSize: 10)),
-            ],
-          ),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.info_outline, color: Colors.white),
-              tooltip: 'About',
-              onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) =>
-                          AboutScreen(language: _language))),
-            ),
-            IconButton(
-              icon: const Icon(Icons.refresh, color: Colors.white),
-              tooltip: 'Reset',
-              onPressed: _resetForm,
-            ),
-            PopupMenuButton<Map<String, String>>(
-              icon: Row(
-                children: [
-                  const Icon(Icons.language,
-                      color: Colors.white, size: 20),
-                  const SizedBox(width: 2),
-                  Text(_currencyCode,
-                      style: const TextStyle(
-                          color: Colors.white, fontSize: 11)),
-                ],
-              ),
-              onSelected: (currency) => _changeCurrency(
-                currency['code']!,
-                currency['symbol']!,
-                currency['name']!,
-              ),
-              itemBuilder: (ctx) =>
-                  LocationCurrencyService.getAllCurrencies()
-                      .map((c) => PopupMenuItem(
-                            value: c,
-                            child: Text(
-                                '${c['symbol']} ${c['name']} (${c['code']})'),
-                          ))
-                      .toList(),
-            ),
+    return Scaffold(
+      backgroundColor: const Color(0xFFF1F8E9),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF1B5E20),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(s.appTitle,
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18)),
+            Text(s.appSubtitle,
+                style: const TextStyle(
+                    color: Colors.white54, fontSize: 10)),
           ],
         ),
-        body: _isLoadingLocation
-            ? Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const CircularProgressIndicator(
-                        color: Color(0xFF1B5E20)),
-                    const SizedBox(height: 20),
-                    Text(s.loading,
-                        style: const TextStyle(
-                            color: Color(0xFF1B5E20),
-                            fontSize: 15)),
-                  ],
-                ),
-              )
-            : SingleChildScrollView(
+        actions: [
+          IconButton(
+            icon:
+                const Icon(Icons.info_outline, color: Colors.white),
+            tooltip: 'About',
+            onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (_) =>
+                        AboutScreen(language: _language))),
+          ),
+          IconButton(
+            icon: const Icon(Icons.refresh, color: Colors.white),
+            tooltip: 'Reset',
+            onPressed: _resetForm,
+          ),
+          PopupMenuButton<Map<String, String>>(
+            icon: Row(
+              children: [
+                const Icon(Icons.language,
+                    color: Colors.white, size: 20),
+                const SizedBox(width: 2),
+                Text(_currencyCode,
+                    style: const TextStyle(
+                        color: Colors.white, fontSize: 11)),
+              ],
+            ),
+            onSelected: (currency) => _changeCurrency(
+              currency['code']!,
+              currency['symbol']!,
+              currency['name']!,
+            ),
+            itemBuilder: (ctx) =>
+                LocationCurrencyService.getAllCurrencies()
+                    .map((c) => PopupMenuItem(
+                          value: c,
+                          child: Text(
+                              '${c['symbol']} ${c['name']} (${c['code']})'),
+                        ))
+                    .toList(),
+          ),
+        ],
+      ),
+      body: _isLoadingLocation
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const CircularProgressIndicator(
+                      color: Color(0xFF1B5E20)),
+                  const SizedBox(height: 20),
+                  Text(s.loading,
+                      style: const TextStyle(
+                          color: Color(0xFF1B5E20),
+                          fontSize: 15)),
+                ],
+              ),
+            )
+          : Directionality(
+              textDirection: textDir,
+              child: SingleChildScrollView(
                 controller: _scrollController,
                 padding: const EdgeInsets.all(16),
                 child: Form(
@@ -270,13 +272,14 @@ class _ZakatCalculatorScreenState
                         decoration: BoxDecoration(
                           color: Colors.green[100],
                           borderRadius: BorderRadius.circular(10),
-                          border:
-                              Border.all(color: Colors.green[300]!),
+                          border: Border.all(
+                              color: Colors.green[300]!),
                         ),
                         child: Row(
                           children: [
                             const Icon(Icons.location_on,
-                                color: Color(0xFF1B5E20), size: 18),
+                                color: Color(0xFF1B5E20),
+                                size: 18),
                             const SizedBox(width: 6),
                             Expanded(
                               child: Text(
@@ -294,9 +297,9 @@ class _ZakatCalculatorScreenState
                       const SizedBox(height: 12),
 
                       ExplanationCard(
-                        goldPrice: double.tryParse(
-                                _goldPriceCtrl.text) ??
-                            0,
+                        goldPrice:
+                            double.tryParse(_goldPriceCtrl.text) ??
+                                0,
                         silverPrice: double.tryParse(
                                 _silverPriceCtrl.text) ??
                             0,
@@ -307,7 +310,7 @@ class _ZakatCalculatorScreenState
                       ),
                       const SizedBox(height: 12),
 
-                      // Metal prices card
+                      // Metal prices
                       Card(
                         color: Colors.amber[50],
                         shape: RoundedRectangleBorder(
@@ -419,7 +422,8 @@ class _ZakatCalculatorScreenState
                                   style: TextStyle(
                                       fontSize: 11,
                                       color: Colors.blue[800],
-                                      fontWeight: FontWeight.w500)),
+                                      fontWeight:
+                                          FontWeight.w500)),
                             ),
                           ],
                         ),
@@ -460,7 +464,8 @@ class _ZakatCalculatorScreenState
                         child: ElevatedButton.icon(
                           onPressed: _calculateZakat,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF1B5E20),
+                            backgroundColor:
+                                const Color(0xFF1B5E20),
                             foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(
                                 borderRadius:
@@ -480,7 +485,9 @@ class _ZakatCalculatorScreenState
                       if (_result != null) ...[
                         SizedBox(key: _resultKey, height: 1),
                         ResultCard(
-                            result: _result!, fmt: fmt, strings: s),
+                            result: _result!,
+                            fmt: fmt,
+                            strings: s),
                       ],
 
                       const SizedBox(height: 40),
@@ -505,7 +512,7 @@ class _ZakatCalculatorScreenState
                   ),
                 ),
               ),
-      ),
+            ),
     );
   }
 }
