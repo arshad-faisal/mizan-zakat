@@ -39,6 +39,8 @@ class ZakatCalculatorService {
 
     return ZakatResult(
       totalWealth: totalWealth,
+      totalAssets: totalAssets,
+      outstandingDebts: assets.outstandingDebts,
       goldNisab: goldNisab,
       silverNisab: silverNisab,
       nisabUsed: nisabUsed,
