@@ -1,95 +1,84 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../services/zakat_calculator_service.dart';
 
 class ExplanationCard extends StatelessWidget {
   final String currencyCode;
+  final String currencySymbol;
   final double goldPrice;
   final double silverPrice;
   final bool isLoading;
-  final String currencySymbol;
   final NumberFormat fmt;
 
   const ExplanationCard({
     super.key,
     required this.currencyCode,
+    required this.currencySymbol,
     required this.goldPrice,
     required this.silverPrice,
     required this.isLoading,
-    required this.currencySymbol,
     required this.fmt,
   });
 
   @override
   Widget build(BuildContext context) {
+    final goldNisabValue =
+        ZakatCalculatorService.goldNisabGrams * goldPrice;
+    final silverNisabValue =
+        ZakatCalculatorService.silverNisabGrams * silverPrice;
+
     return Card(
-      color: const Color(0xFF1B5E20),
+      color: Colors.green[50],
       shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16)),
+          borderRadius: BorderRadius.circular(12)),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(14),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              '📖 What is Zakat?',
-              style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
+            const Text('📖 What is Zakat?',
+                style: TextStyle(
+                    fontWeight: FontWeight.bold, fontSize: 14)),
+            const SizedBox(height: 6),
             const Text(
               'Zakat is the 3rd Pillar of Islam — an annual 2.5% charity on wealth held for one full lunar year (Hawl), if it exceeds the Nisab (minimum threshold).',
-              style: TextStyle(color: Colors.white70, fontSize: 13),
+              style: TextStyle(fontSize: 12, color: Colors.black87),
             ),
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.15),
-                borderRadius: BorderRadius.circular(10),
+            const SizedBox(height: 10),
+            if (!isLoading && goldPrice > 0) ...[
+              _InfoRow(
+                  label: '⚖️ Zakat Rate',
+                  value: '2.5% of Net Wealth'),
+              _InfoRow(
+                  label: '🥇 Gold Nisab',
+                  value:
+                      '${fmt.format(ZakatCalculatorService.goldNisabGrams)} grams of gold'),
+              _InfoRow(
+                  label: '🥈 Silver Nisab',
+                  value:
+                      '${fmt.format(ZakatCalculatorService.silverNisabGrams)} grams of silver'),
+              if (goldNisabValue > 0)
+                _InfoRow(
+                    label: '💰 Gold Nisab Value',
+                    value:
+                        '$currencySymbol ${fmt.format(goldNisabValue)}'),
+              if (silverNisabValue > 0)
+                _InfoRow(
+                    label: '💰 Silver Nisab Value',
+                    value:
+                        '$currencySymbol ${fmt.format(silverNisabValue)}'),
+              const SizedBox(height: 4),
+              Text(
+                '* Silver Nisab is used (recommended — more inclusive per Hanafi school)',
+                style:
+                    TextStyle(fontSize: 10, color: Colors.grey[600]),
               ),
-              child: Column(
-                children: [
-                  _InfoRow(
-                    label: 'Zakat Rate',
-                    value: '2.5% of Net Wealth',
-                    icon: Icons.percent,
-                  ),
-                  const Divider(color: Colors.white30, height: 16),
-                  _InfoRow(
-                    label: 'Gold Nisab',
-                    value: '87.48 grams of gold',
-                    icon: Icons.circle,
-                    iconColor: Colors.amber,
-                  ),
-                  const Divider(color: Colors.white30, height: 16),
-                  _InfoRow(
-                    label: 'Silver Nisab',
-                    value: '612.36 grams of silver',
-                    icon: Icons.circle,
-                    iconColor: Colors.grey[300]!,
-                  ),
-                  if (!isLoading) ...[
-                    const Divider(color: Colors.white30, height: 16),
-                    _InfoRow(
-                      label: 'Silver Nisab Today',
-                      value:
-                          '$currencySymbol ${fmt.format(612.36 * silverPrice)}',
-                      icon: Icons.today,
-                    ),
-                  ],
-                ],
+            ] else ...[
+              const Text(
+                'Enter gold & silver prices above to see current Nisab values.',
+                style: TextStyle(fontSize: 12, color: Colors.black54),
               ),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              '* Silver Nisab is used for mixed assets — recommended by majority of scholars.',
-              style: TextStyle(
-                  color: Colors.white54,
-                  fontSize: 11,
-                  fontStyle: FontStyle.italic),
-            ),
+            ],
           ],
         ),
       ),
@@ -98,35 +87,24 @@ class ExplanationCard extends StatelessWidget {
 }
 
 class _InfoRow extends StatelessWidget {
-  final String label;
-  final String value;
-  final IconData icon;
-  final Color? iconColor;
-
-  const _InfoRow({
-    required this.label,
-    required this.value,
-    required this.icon,
-    this.iconColor,
-  });
+  final String label, value;
+  const _InfoRow({required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(icon, size: 16, color: iconColor ?? Colors.white),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(label,
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label,
               style: const TextStyle(
-                  color: Colors.white70, fontSize: 13)),
-        ),
-        Text(value,
-            style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 13)),
-      ],
+                  fontSize: 12, color: Colors.black54)),
+          Text(value,
+              style: const TextStyle(
+                  fontSize: 12, fontWeight: FontWeight.w600)),
+        ],
+      ),
     );
   }
 }
