@@ -1,3 +1,4 @@
+import 'dart:ui' show TextDirection;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../services/location_currency_service.dart';
