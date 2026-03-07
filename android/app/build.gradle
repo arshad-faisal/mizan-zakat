@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace "com.mizanzakat.zakat_calculator"
+    namespace "com.mizanzakat.app"
     compileSdk 36
     ndkVersion "27.0.12077973"
 
@@ -19,7 +19,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.mizanzakat.zakat_calculator"
+        applicationId "com.mizanzakat.app"
         minSdk 21
         targetSdk 36
         versionCode 1
