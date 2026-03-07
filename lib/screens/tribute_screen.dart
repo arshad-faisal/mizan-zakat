@@ -283,7 +283,7 @@ class _DuaCard extends StatelessWidget {
           Text('"$translation"',
               textAlign: TextAlign.center,
               style: const TextStyle(
-                  color: Colors.white.withOpacity(0.8),
+                  color: Color(0xCCFFFFFF),
                   fontSize: 14,          // ← clear & readable
                   height: 1.5)),
           const SizedBox(height: 6),
