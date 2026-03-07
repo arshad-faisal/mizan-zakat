@@ -5,16 +5,6 @@ workflows:
     environment:
       flutter: stable
     scripts:
-      - name: Setup project
-        script: |
-          cp pubspec.yaml pubspec.yaml.bak
-          cp -r lib lib.bak
-          rm -rf android ios linux macos windows web
-          flutter create --platforms android --project-name zakat_calculator --org com.mizanzakat .
-          cp pubspec.yaml.bak pubspec.yaml
-          rm -rf lib
-          cp -r lib.bak lib
-
       - name: Get dependencies
         script: flutter pub get
 
