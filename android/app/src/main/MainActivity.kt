@@ -1,4 +1,4 @@
-package com.mizanzakat.zakat_calculator
+package com.mizanzakat.app
 
 import io.flutter.embedding.android.FlutterActivity
 
