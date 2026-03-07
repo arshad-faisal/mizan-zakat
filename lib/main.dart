@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'screens/tribute_screen.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MizanZakatApp());
 }
 
