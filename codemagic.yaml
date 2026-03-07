@@ -14,14 +14,23 @@ workflows:
           cp pubspec.yaml.bak pubspec.yaml
           rm -rf lib
           cp -r lib.bak lib
+
       - name: Get dependencies
         script: flutter pub get
-              - flutter pub run flutter_launcher_icons
+
+      - name: Generate launcher icons
+        script: flutter pub run flutter_launcher_icons
+
       - name: Build APK
         script: flutter build apk --release
+
     artifacts:
       - build/app/outputs/flutter-apk/app-release.apk
+
     publishing:
       email:
         recipients:
           - arshadfaisal786@gmail.com
+        notify:
+          success: true
+          failure: true
